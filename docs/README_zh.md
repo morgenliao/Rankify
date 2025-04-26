@@ -1,6 +1,8 @@
 [ [English](README.md) | [中文](README_zh.md)]
+
 # <p align="center"><img src="./images/rankify-crop.png" width="300" style ="border-radius: 50;"/></p>
-### <div align="center">🔥 Rankify: 一个全面的 Python 工具包，专为检索、重排序和检索增强生成（RAG）设计 🔥<div>
+
+## <div align="center">🔥 Rankify: 一个全面的 Python 工具包，专为检索、重排序和检索增强生成（RAG）设计 🔥<div>
 
 > 📢 特别感谢 [Xiumao](https://github.com/xiumaoprompt) 对 Rankify 的大力支持与推广！  
 > 以下是他撰写的两篇精彩中文解析文章，为用户更好理解 Rankify 提供了重要帮助：
@@ -21,8 +23,6 @@
 <a href="https://star-history.com/#DataScienceUIBK/Rankify"> <img src="https://img.shields.io/github/stars/DataScienceUIBK/Rankify?style=social" alt="GitHub stars"> </a>  
 </div>
 
-如果你喜欢我们的框架，**请不要犹豫，⭐ 给这个仓库加星 ⭐**。这将帮助我们**使 Rankify 变得更强大，并扩展到更多模型和方法 🤗**。
-
 <img src="./images/output.gif" height=50 alt="Star the repo   " />
 
 ---
@@ -36,7 +36,8 @@ _Rankify 是一个 Python 工具包，专为统一的检索、重排序和检索
 </p>
 
 ---
-## 🚀 演示
+
+## 演示
 
 要在本地运行演示，请执行以下操作：
 
@@ -48,18 +49,13 @@ pip install streamlit
 streamlit run demo.py
 ```
 
+(<https://github.com/user-attachments/assets/13184943-55db-4f0c-b509-fde920b809bc>)
 
-https://github.com/user-attachments/assets/13184943-55db-4f0c-b509-fde920b809bc
-
----
-## :sparkles: 特性
+## 特性
 
 - **全面的检索与重排序框架**：Rankify 将检索、重排序和检索增强生成（RAG）整合为一个模块化的 Python 工具包，支持无缝实验和基准测试。  
-
 - **广泛的数据集支持**：包含 **40 个基准数据集**，提供 **预检索文档**，涵盖 **问答、对话、实体链接和事实验证**等多个领域。  
-
 - **多样化的检索器集成**：支持 **7 种检索技术**，包括 **BM25、DPR、ANCE、BPR、ColBERT、BGE 和 Contriever**，提供灵活的检索策略选择。  
-
 - **先进的重排序模型**：实现 **24 种主流重排序模型** 和 **41 种子方法**，涵盖 **点对、对对（pairwise）、列表级（listwise）** 重排序方法，以提升排名性能。  
 
 - **预构建检索索引**：提供 **预计算的 Wikipedia 和 MS MARCO 语料库**，适用于多种检索模型，减少索引开销，加速实验进程。  
@@ -72,11 +68,11 @@ https://github.com/user-attachments/assets/13184943-55db-4f0c-b509-fde920b809bc
 
 - **用户友好的文档支持**：提供详细的 **[📖 在线文档](http://rankify.readthedocs.io/)**、示例笔记本和教程，便于快速上手。  
 
-## 🔍 发展路线图  
+## 发展路线图  
 
 **Rankify** 仍在积极开发中，目前已发布首个版本（**v0.1.0**）。尽管当前已支持多种检索、重排序和 RAG 技术，我们仍在不断增强其功能，计划增加更多的检索器、排序器、数据集和特性。  
 
-### 🚀 计划改进  
+### 计划改进  
 
 - **检索器（Retrievers）**  
   - [x] 支持 **BM25、DPR、ANCE、BPR、ColBERT、BGE 和 Contriever**  
@@ -103,44 +99,54 @@ https://github.com/user-attachments/assets/13184943-55db-4f0c-b509-fde920b809bc
 - **流程集成（Pipeline Integration）**  
   - [ ] **新增流水线模块**，简化检索、重排序和 RAG 工作流  
 
-## 🔧 安装指南  
+## 安装指南
 
-#### 设置虚拟环境  
+### 设置虚拟环境
+
 首先，使用 Python 3.10 创建并激活 conda 环境：  
 
 ```bash
 conda create -n rankify python=3.10
 conda activate rankify
 ```
-#### 安装 PyTorch 2.5.1
+
+### 安装 PyTorch 2.5.1
+
 我们推荐使用 PyTorch 2.5.1 来安装 Rankify。请参考 [PyTorch installation page](https://pytorch.org/get-started/previous-versions/) 获取特定平台的安装命令。
 
 如果你可以使用 GPU，我们建议安装支持 CUDA 12.4 或 12.6 版本的 PyTorch，因为许多评估指标已针对 GPU 进行了优化。
 
 安装 PyTorch 2.5.1，可使用以下命令：
+
 ```bash
 pip install torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cu124
 ```
-#### 基本安装
+
+### 基本安装
+
 要安装 Rankify，只需使用 pip（要求 Python 3.10 及以上版本）：
-```base
+
+```shell
 pip install rankify
 ```
 
 此命令将安装 Rankify 的基本功能，包括检索、重排序和检索增强生成（RAG）。
 
-#### 推荐安装方式
+### 推荐安装方式
+
 为了获得完整功能，推荐安装 Rankify 及所有依赖项：
 
-```bash
+```shell
 pip install "rankify[all]"
 ```
+
 这将确保所有必要的模块，包括检索、重排序和 RAG 支持，均已安装。
 
 #### 可选依赖项
+
 如果你只想安装特定组件，可使用以下命令：
 
-```bash
+```shell
 # 仅安装检索相关依赖（支持 BM25、DPR、ANCE 等）
 pip install "rankify[retriever]"
 
@@ -150,7 +156,6 @@ pip install "rankify[reranking]"
 
 从 GitHub 安装最新开发版本
 如果希望获取最新的开发版本，可从 GitHub 进行安装：
-
 
 ```bash
 git clone https://github.com/DataScienceUIBK/rankify.git
@@ -163,14 +168,21 @@ pip install -e ".[retriever]"
 # 仅安装重排序相关依赖
 pip install -e ".[reranking]"
 ```
+
 #### 使用 ColBERT 检索器
+
 如果你想使用 ColBERT 检索器，请按照以下步骤进行额外设置：
 
 ```bash
 # 安装 GCC 和必要的库
+# `gcc` 和 `gxx` 是 GNU 编译器集合（GNU Compiler Collection）的一部分：
+# **`gcc`**：GNU C 编译器，用于编译 C 语言代码。
+# **`gxx`**：GNU C++ 编译器，用于编译 C++ 语言代码。
+# 它们是构建和编译 C/C++ 项目的核心工具，广泛用于各种操作系统和开发环境中。
 conda install -c conda-forge gcc=9.4.0 gxx=9.4.0
 conda install -c conda-forge libstdcxx-ng
 ```
+
 ```bash
 # 导出必要的环境变量
 export LD_LIBRARY_PATH=$CONDA_PREFIX/lib:$LD_LIBRARY_PATH
@@ -181,7 +193,9 @@ export PATH=$CONDA_PREFIX/bin:$PATH
 # 清除缓存的 Torch 扩展
 rm -rf ~/.cache/torch_extensions/*
 ```
+
 ---
+
 ## :rocket: 快速开始
 
 ### **1️⃣ 预检索数据集**  
@@ -193,6 +207,7 @@ rm -rf ~/.cache/torch_extensions/*
 #### **数据集格式**  
 
 预检索的文档结构如下：
+
 ```json
 [
     {
@@ -216,6 +231,7 @@ rm -rf ~/.cache/torch_extensions/*
 #### **列出可用数据集**  
 
 要查看所有可用的数据集，请运行以下代码：
+
 ```python
 from rankify.dataset.dataset import Dataset 
 
@@ -223,8 +239,8 @@ from rankify.dataset.dataset import Dataset
 Dataset.avaiable_dataset()
 ```
 
-
 **BM25 检索器数据集**
+
 ```python
 from rankify.dataset.dataset import Dataset
 
@@ -274,6 +290,7 @@ documents = dataset.download(force_download=False)
 ```
 
 **BGE 检索器数据集**
+
 ```python
 from rankify.dataset.dataset import Dataset
 
@@ -291,6 +308,7 @@ documents = dataset.download(force_download=False)
 ```
 
 **ColBERT 检索器数据集**
+
 ```python
 from rankify.dataset.dataset import Dataset
 
@@ -308,6 +326,7 @@ documents = dataset.download(force_download=False)
 ```
 
 **MSS-DPR 检索器数据集**
+
 ```python
 from rankify.dataset.dataset import Dataset
 
@@ -325,6 +344,7 @@ documents = dataset.download(force_download=False)
 ```
 
 **MSS 检索器数据集**
+
 ```python
 from rankify.dataset.dataset import Dataset
 
@@ -342,6 +362,7 @@ documents = dataset.download(force_download=False)
 ```
 
 **Contriever 检索器数据集**
+
 ```python
 from rankify.dataset.dataset import Dataset
 
@@ -359,6 +380,7 @@ documents = dataset.download(force_download=False)
 ```
 
 **ANCE 检索器数据集**
+
 ```python
 from rankify.dataset.dataset import Dataset
 
@@ -378,12 +400,14 @@ documents = dataset.download(force_download=False)
 **从文件加载预检索数据集**  
 
 如果你已经下载了数据集，可以直接加载它：  
+
 ```python
 from rankify.dataset.dataset import Dataset
 
 # 加载已下载的 WebQuestions 数据集（BM25 检索结果）
 documents = Dataset.load_dataset('./tests/out-datasets/bm25/web_questions/test.json', 100)
 ```
+
 现在，你可以将 检索文档 与 重排序 和 RAG 工作流集成！🚀
 
 #### 预检索数据集的特性比较
@@ -770,9 +794,11 @@ documents = Dataset.load_dataset('./tests/out-datasets/bm25/web_questions/test.j
 ---
 
 ### 2️⃣ 运行检索
+
 使用 **Rankify** 进行检索时，您可以选择多种检索方法，例如 **BM25、DPR、ANCE、Contriever、ColBERT 和 BGE**。
 
 **示例：对示例查询运行检索**
+
 ```python
 from rankify.dataset.dataset import Document, Question, Answer, Context
 from rankify.retrievers.retriever import Retriever
@@ -843,6 +869,7 @@ bge_retriever_msmacro = Retriever(method="bge", model="BAAI/bge-large-en-v1.5", 
 **运行检索**
 
 定义检索器后，可以使用以下代码检索文档：
+
 ```python
 retrieved_documents = bm25_retriever_wiki.retrieve(documents)
 
@@ -854,9 +881,11 @@ for i, doc in enumerate(retrieved_documents):
 ---
 
 ## 3️⃣ 运行重排序（Reranking）
+
 Rankify 支持多种重排序模型。以下是使用每种模型的示例。
 
 **示例：对文档进行重排序**
+
 ```python
 from rankify.dataset.dataset import Document, Question, Answer, Context
 from rankify.models.reranking import Reranking
@@ -885,6 +914,7 @@ for context in document.reorder_contexts:
 ```
 
 **使用不同重排序模型的示例**
+
 ```python
 # UPR
 model = Reranking(method='upr', model_name='t5-base')
@@ -977,9 +1007,11 @@ model = Reranking(method='vicuna_reranker', model_name='rank_vicuna_7b_v1')
 # Zephyr Reranker
 model = Reranking(method='zephyr_reranker', model_name='rank_zephyr_7b_v1_full')
 ```
+
 ---
 
 ## 4️⃣ 使用生成器模块
+
 Rankify 提供了一个 **生成器模块**，用于 **检索增强生成 (RAG)**，将检索到的文档集成到生成模型中，以生成答案。以下是如何使用不同生成方法的示例。
 
 ```python
@@ -1043,17 +1075,19 @@ before_ranking_metrics = metrics.calculate_retrieval_metrics(ks=[1, 5, 10, 20, 5
 
 print(before_ranking_metrics)
 ```
+
 评估重排序结果
+
 ```python
 # 计算重排序后的检索指标
 after_ranking_metrics = metrics.calculate_retrieval_metrics(ks=[1, 5, 10, 20, 50, 100], use_reordered=True)
 print(after_ranking_metrics)
 ```
 
-
 ## 📜 支持的模型
 
 ### **1️⃣ 检索器（Retrievers）**  
+
 - ✅ **BM25**
 - ✅ **DPR** 
 - ✅ **ColBERT**   
@@ -1064,6 +1098,7 @@ print(after_ranking_metrics)
 - 🕒 **Spar**   
 - 🕒 **Dragon** 
 - 🕒 **Hybird** 
+
 ---
 
 ### **2️⃣ 重新排序器（Rerankers）**  
@@ -1095,11 +1130,14 @@ print(after_ranking_metrics)
 - ✅ **Incontext 重新排序器**
 - 🕒 **DynRank**
 - 🕒 **ASRank**
+
 ---
 
 ### **3️⃣ 生成器（Generators）**  
+
 - ✅ **融合解码（Fusion-in-Decoder, FiD）与 T5**
 - ✅ **上下文学习 RLAM（In-Context Learning RLAM）** 
+
 ---
 
 ## 📖 文档
@@ -1128,10 +1166,10 @@ print(after_ranking_metrics)
 
 4. 推送更改 到您的分支：
 
-
 ```bash
    git push origin feature/YourFeatureName
 ```
+
 5. 提交 Pull Request 以提议您的更改。
 
 感谢您的贡献，让这个项目变得更好！
@@ -1160,7 +1198,6 @@ Rankify 采用 **Apache-2.0 许可证** 发布 - 详情请参阅 [LICENSE](https
 ## :star2: 论文引用
 
 如果 **Rankify** 对您的研究有帮助，请引用我们的论文：
-
 
 ```BibTex
 @article{abdallah2025rankify,
