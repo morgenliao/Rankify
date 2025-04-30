@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>双缝干涉实验 - 仅三组件</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            background-color: #000;
+            color: white;
+        }
+        canvas {
+            display: block;
+        }
+        #info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 100;
+            max-width: 320px;
+        }
+        .control-group {
+            margin-bottom: 12px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="range"] {
+            width: 100%;
+        }
+        .value-display {
+            display: inline-block;
+            width: 50px;
+            text-align: right;
+        }
+        button {
+            background: #4a7bff;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px 0;
+        }
+        button:hover {
+            background: #3a67e3;
+        }
+    </style>
+</head>
+<body>
+    <div id="info">
+        <h3 style="margin-top: 0;">双缝干涉实验 - 三组件</h3>
+        
+        <div class="control-group">
+            <label>光源颜色 (nm):
+                <span id="wavelengthValue" class="value-display">550</span>
+            </label>
+            <input type="range" id="wavelength" min="380" max="750" value="550" step="1">
+        </div>
+        
+        <div class="control-group">
+            <label>缝隙宽度 (mm):
+                <span id="slitWidthValue" class="value-display">2</span>
+            </label>
+            <input type="range" id="slitWidth" min="0.5" max="5" value="2" step="0.1">
+        </div>
+        
+        <div class="control-group">
+            <label>缝隙间距 (mm):
+                <span id="slitDistanceValue" class="value-display">10</span>
+            </label>
+            <input type="range" id="slitDistance" min="5" max="25" value="10" step="0.5">
+        </div>
+        
+        <div class="control-group">
+            <label>光强:
+                <span id="intensityValue" class="value-display">5</span>
+            </label>
+            <input type="range" id="intensity" min="1" max="10" value="5" step="1">
+        </div>
+        
+        <!-- 新增渲染参数控制 -->
+        <hr style="margin: 10px 0; border-color: #666;">
+        <h4 style="margin: 5px 0;">渲染参数</h4>
+        
+        <div class="control-group">
+            <label>粒子数量:
+                <span id="maxPhotonsValue" class="value-display">1000</span>
+            </label>
+            <input type="range" id="maxPhotons" min="200" max="3000" value="1000" step="100">
+        </div>
+        
+        <div class="control-group">
+            <label>粒子大小:
+                <span id="particleSizeValue" class="value-display">1.5</span>
+            </label>
+            <input type="range" id="particleSize" min="0.5" max="5" value="1.5" step="0.1">
+        </div>
+        
+        <div class="control-group">
+            <label>发射速率:
+                <span id="emissionRateValue" class="value-display">10</span>
+            </label>
+            <input type="range" id="emissionRate" min="1" max="50" value="10" step="1">
+        </div>
+        
+        <button id="toggleObservation">开启观测模式</button>
+        <button id="resetView">重置视角</button>
+        
+        <p id="explanation">简单双缝干涉实验：光源、双缝板、底板。干涉条纹投射在底板上。</p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
+    
+    <script>
+        // 全局变量
+        let scene, camera, renderer, controls;
+        let lightSource, barrierPlate, bottomPlate;
+        let wavelength = 550;
+        let slitWidth = 2;
+        let slitDistance = 10;
+        let intensity = 5;
+        let observationMode = false;
+        let photons = []; // 添加光子数组
+        let photonSystem; // 粒子系统
+        
+        // 渲染参数
+        let maxPhotons = 1000;
+        let particleSize = 1.5;
+        let emissionRate = 10;
+
+        // 波长到RGB颜色的转换
+        function wavelengthToColor(wavelength) {
+            let r, g, b;
+            
+            if (wavelength >= 380 && wavelength < 440) {
+                r = -1 * (wavelength - 440) / (440 - 380);
+                g = 0;
+                b = 1;
+            } else if (wavelength >= 440 && wavelength < 490) {
+                r = 0;
+                g = (wavelength - 440) / (490 - 440);
+                b = 1;
+            } else if (wavelength >= 490 && wavelength < 510) {
+                r = 0;
+                g = 1;
+                b = -1 * (wavelength - 510) / (510 - 490);
+            } else if (wavelength >= 510 && wavelength < 580) {
+                r = (wavelength - 510) / (580 - 510);
+                g = 1;
+                b = 0;
+            } else if (wavelength >= 580 && wavelength < 645) {
+                r = 1;
+                g = -1 * (wavelength - 645) / (645 - 580);
+                b = 0;
+            } else if (wavelength >= 645 && wavelength <= 780) {
+                r = 1;
+                g = 0;
+                b = 0;
+            } else {
+                r = 0;
+                g = 0;
+                b = 0;
+            }
+            
+            // 调整强度
+            let factor = 0;
+            if (wavelength >= 380 && wavelength < 420) {
+                factor = 0.3 + 0.7 * (wavelength - 380) / (420 - 380);
+            } else if (wavelength >= 420 && wavelength <= 700) {
+                factor = 1.0;
+            } else if (wavelength > 700 && wavelength <= 780) {
+                factor = 0.3 + 0.7 * (780 - wavelength) / (780 - 700);
+            }
+            
+            return new THREE.Color(r * factor, g * factor, b * factor);
+        }
+        
+        // 初始化场景
+        function init() {
+            // 创建场景
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x000000);
+            
+            // 创建渲染器并启用阴影
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // 限制像素比以提高性能
+            document.body.appendChild(renderer.domElement);
+            
+            // 创建相机 - 先使用透视相机初始化
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2000);
+            
+            // 添加轨道控制
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.1;
+            
+            // 添加坐标轴辅助
+            const axesHelper = new THREE.AxesHelper(30);
+            scene.add(axesHelper);
+            
+            // 添加环境光（确保能看到所有物体）
+            const ambientLight = new THREE.AmbientLight(0x404040);
+            scene.add(ambientLight);
+            
+            // 添加视图按钮
+            addViewButtons();
+            
+            // 创建实验的三个基本组件
+            createLightSource();
+            createBarrierPlate();
+            createBottomPlate();
+            
+            // 创建光子系统
+            createPhotonSystem();
+            
+            // 添加事件监听器 - 确保在组件创建后再设置监听器
+            setupEventListeners();
+            window.addEventListener('resize', onWindowResize);
+            
+            // 设置为顶视图
+            setTopView();
+            
+            // 开始动画循环
+            animate();
+        }
+
+        // 设置顶视图 - 修正相机角度和位置
+        function setTopView() {
+            // 使用正交相机以便更好地俯视观察
+            if (!(camera instanceof THREE.OrthographicCamera)) {
+                const aspect = window.innerWidth / window.innerHeight;
+                const viewSize = 60;
+                camera = new THREE.OrthographicCamera(
+                    -viewSize * aspect / 2, viewSize * aspect / 2, 
+                    viewSize / 2, -viewSize / 2, 
+                    0.1, 1000
+                );
+                // 重新设置控制器的相机
+                if (controls) {
+                    controls.object = camera;
+                }
+            }
+            
+            camera.position.set(0, 100, 0);
+            camera.up.set(0, 0, -1); // 修正相机上方向为-z方向
+            camera.lookAt(0, 0, 0);
+            
+            if (controls) {
+                controls.target.set(0, 0, 0);
+                controls.update();
+            }
+            
+            // 渲染一帧确保视图更新
+            if (renderer) renderer.render(scene, camera);
+        }
+
+        // 设置侧视图（可选的额外视角）
+        function setSideView() {
+            // 切换回透视相机以便更好地侧视观察
+            if (!(camera instanceof THREE.PerspectiveCamera)) {
+                camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2000);
+                // 重新设置控制器的相机
+                if (controls) {
+                    controls.object = camera;
+                }
+            }
+            
+            camera.position.set(0, 30, 60);
+            camera.up.set(0, 1, 0); // 默认上方向
+            camera.lookAt(0, 0, 0);
+            
+            if (controls) {
+                controls.target.set(0, 0, 0);
+                controls.update();
+            }
+            
+            // 渲染一帧确保视图更新
+            if (renderer) renderer.render(scene, camera);
+        }
+        
+        // 创建光源
+        function createLightSource() {
+            // 光源几何体
+            const geometry = new THREE.SphereGeometry(2, 32, 32);
+            
+            // 光源材质 - 自发光
+            const material = new THREE.MeshBasicMaterial({
+                color: wavelengthToColor(wavelength),
+                emissive: wavelengthToColor(wavelength)
+            });
+            
+            // 创建光源
+            lightSource = new THREE.Mesh(geometry, material);
+            lightSource.position.set(0, 0, -30);
+            scene.add(lightSource);
+            
+            // 添加聚光灯代替点光源，使光线更有方向性
+            const spotLight = new THREE.SpotLight(
+                wavelengthToColor(wavelength),
+                intensity * 2,
+                100,
+                Math.PI / 8,
+                0.5,
+                2
+            );
+            spotLight.position.copy(lightSource.position);
+            spotLight.target.position.set(0, 0, 30);
+            scene.add(spotLight);
+            scene.add(spotLight.target);
+        }
+
+        // 创建光子系统 - 使用全局渲染参数
+        function createPhotonSystem() {
+            // 删除现有粒子系统
+            if (photonSystem) scene.remove(photonSystem);
+            
+            // 创建粒子几何体
+            const geometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(maxPhotons * 3);
+            const colors = new Float32Array(maxPhotons * 3);
+            
+            // 初始化光子
+            photons = [];
+            const color = wavelengthToColor(wavelength);
+            
+            // 创建粒子材质 - 使用参数控制粒子尺寸
+            const material = new THREE.PointsMaterial({
+                size: particleSize,
+                transparent: true,
+                opacity: 1.0,
+                vertexColors: true,
+                blending: THREE.AdditiveBlending,
+                sizeAttenuation: true
+            });
+            
+            // 创建粒子系统
+            photonSystem = new THREE.Points(geometry, material);
+            scene.add(photonSystem);
+            
+            // 光子发射系统 - 使用参数控制发射速率
+            clearInterval(window.photonEmitterInterval);
+            window.photonEmitterInterval = setInterval(() => {
+                if (photons.length < maxPhotons) {
+                    // 根据发射速率参数决定每次发射的光子数量
+                    const numNewPhotons = Math.min(emissionRate, maxPhotons - photons.length);
+                    for (let i = 0; i < numNewPhotons; i++) {
+                        emitPhoton();
+                    }
+                }
+            }, 100);
+        }
+        
+        // 发射单个光子 - 修改光子初始可见度
+        function emitPhoton() {
+            const sourceWidth = 4;  // 光源大小
+            const color = wavelengthToColor(wavelength);
+            
+            // 从光源随机位置发射
+            const photon = {
+                position: new THREE.Vector3(
+                    (Math.random() - 0.5) * sourceWidth,
+                    (Math.random() - 0.5) * sourceWidth,
+                    lightSource.position.z
+                ),
+                velocity: new THREE.Vector3(
+                    (Math.random() - 0.5) * 0.1,  // 有轻微随机扩散
+                    (Math.random() - 0.5) * 0.1,
+                    0.5 + Math.random() * 0.2     // 向z轴正方向移动
+                ),
+                color: color,
+                life: 200 + Math.random() * 50,   // 粒子寿命
+                passedBarrier: false,             // 是否已穿过屏障
+                goThrough: false                  // 是否通过了缝隙
+            };
+            
+            photons.push(photon);
+        }
+        
+        // 更新光子系统
+        function updatePhotons() {
+            // 检测光子与屏障的交互
+            const barrierZ = barrierPlate.position.z;
+            const bottomZ = bottomPlate.position.z;
+            const halfDistance = slitDistance / 2;
+            
+            // 更新每个光子位置
+            for (let i = photons.length - 1; i >= 0; i--) {
+                const photon = photons[i];
+                
+                // 更新位置
+                photon.position.add(photon.velocity);
+                
+                // 检查是否穿过双缝板
+                if (!photon.passedBarrier && photon.position.z >= barrierZ) {
+                    photon.passedBarrier = true;
+                    
+                    // 检查是否通过缝隙
+                    const x = photon.position.x;
+                    if (Math.abs(x - halfDistance) < slitWidth/2 || 
+                        Math.abs(x + halfDistance) < slitWidth/2) {
+                        
+                        // 光子通过缝隙
+                        photon.goThrough = true;
+                        
+                        if (observationMode) {
+                            // 观测模式：向一个随机方向偏转
+                            photon.velocity.x += (Math.random() - 0.5) * 0.2;
+                            photon.velocity.y += (Math.random() - 0.5) * 0.2;
+                        } else {
+                            // 干涉模式：按波的干涉原理调整方向
+                            // 这里使用一个简单的模型来模拟干涉效果
+                            const phase = Math.PI * 2 * Math.random();
+                            photon.velocity.x += 0.05 * Math.sin(phase);
+                            photon.velocity.y += 0.05 * Math.cos(phase);
+                        }
+                    } else {
+                        // 光子被挡住
+                        photons.splice(i, 1);
+                        continue;
+                    }
+                }
+                
+                // 检查是否到达底板
+                if (photon.position.z >= bottomZ) {
+                    photon.velocity.set(0, 0, 0); // 停止移动
+                }
+                
+                // 减少寿命
+                photon.life--;
+                if (photon.life <= 0) {
+                    photons.splice(i, 1);
+                }
+            }
+            
+            // 更新粒子系统几何体
+            updateParticleGeometry();
+        }
+        
+        // 更新粒子系统几何体
+        function updateParticleGeometry() {
+            const positions = new Float32Array(photons.length * 3);
+            const colors = new Float32Array(photons.length * 3);
+            
+            for (let i = 0; i < photons.length; i++) {
+                const photon = photons[i];
+                const i3 = i * 3;
+                
+                positions[i3] = photon.position.x;
+                positions[i3 + 1] = photon.position.y;
+                positions[i3 + 2] = photon.position.z;
+                
+                colors[i3] = photon.color.r;
+                colors[i3 + 1] = photon.color.g;
+                colors[i3 + 2] = photon.color.b;
+            }
+            
+            photonSystem.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            photonSystem.geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+            photonSystem.geometry.attributes.position.needsUpdate = true;
+            photonSystem.geometry.attributes.color.needsUpdate = true;
+        }
+
+        // 动画循环 - 添加性能监控
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // 更新光子
+            updatePhotons();
+            
+            // 更新控制器
+            if (controls) controls.update();
+            
+            // 渲染场景
+            renderer.render(scene, camera);
+        }
+        
+        // 更新实验参数 - 完全重构
+        function updateExperiment() {
+            console.log("更新实验参数:", wavelength, slitWidth, slitDistance, intensity);
+            
+            // 1. 更新光源颜色
+            updateLightSource();
+            
+            // 2. 更新双缝板
+            updateBarrierSlits();
+            
+            // 3. 重置光子系统
+            resetPhotonSystem();
+            
+            // 4. 更新UI显示
+            updateUIValues();
+        }
+        
+        // 更新UI显示值
+        function updateUIValues() {
+            document.getElementById('wavelengthValue').textContent = wavelength;
+            document.getElementById('slitWidthValue').textContent = slitWidth;
+            document.getElementById('slitDistanceValue').textContent = slitDistance;
+            document.getElementById('intensityValue').textContent = intensity;
+            document.getElementById('maxPhotonsValue').textContent = maxPhotons;
+            document.getElementById('particleSizeValue').textContent = particleSize;
+            document.getElementById('emissionRateValue').textContent = emissionRate;
+        }
+        
+        // 更新光源
+        function updateLightSource() {
+            const color = wavelengthToColor(wavelength);
+            
+            // 更新光源球体颜色
+            if (lightSource && lightSource.material) {
+                lightSource.material.color.copy(color);
+                lightSource.material.emissive = color;
+                lightSource.material.needsUpdate = true;
+            }
+            
+            // 更新聚光灯颜色和强度
+            scene.children.forEach(child => {
+                if (child instanceof THREE.SpotLight) {
+                    child.color.copy(color);
+                    child.intensity = intensity * 2;
+                }
+            });
+        }
+        
+        // 更新双缝板的缝隙
+        function updateBarrierSlits() {
+            // 移除所有现有缝隙
+            scene.children.forEach(child => {
+                if (child.userData && child.userData.type === 'slit') {
+                    scene.remove(child);
+                }
+            });
+            
+            // 创建新的缝隙
+            const halfDistance = slitDistance / 2;
+            
+            // 右缝
+            const rightSlitGeom = new THREE.BoxGeometry(slitWidth, 40, 1.1);
+            const rightSlit = new THREE.Mesh(rightSlitGeom, new THREE.MeshBasicMaterial({
+                color: 0x000000,
+                transparent: true,
+                opacity: 0
+            }));
+            rightSlit.position.set(halfDistance, 0, 0);
+            rightSlit.userData = { type: 'slit' };
+            scene.add(rightSlit);
+            
+            // 左缝
+            const leftSlitGeom = new THREE.BoxGeometry(slitWidth, 40, 1.1);
+            const leftSlit = new THREE.Mesh(leftSlitGeom, new THREE.MeshBasicMaterial({
+                color: 0x000000,
+                transparent: true,
+                opacity: 0
+            }));
+            leftSlit.position.set(-halfDistance, 0, 0);
+            leftSlit.userData = { type: 'slit' };
+            scene.add(leftSlit);
+        }
+        
+        // 重置光子系统
+        function resetPhotonSystem() {
+            // 清除所有现有光子
+            photons = [];
+            
+            // 删除旧粒子系统并创建新系统
+            if (photonSystem) scene.remove(photonSystem);
+            
+            const geometry = new THREE.BufferGeometry();
+            const material = new THREE.PointsMaterial({
+                size: particleSize,
+                transparent: true,
+                opacity: 1.0,
+                vertexColors: true,
+                blending: THREE.AdditiveBlending,
+                sizeAttenuation: true
+            });
+            
+            photonSystem = new THREE.Points(geometry, material);
+            scene.add(photonSystem);
+            
+            // 重置发射器
+            clearInterval(window.photonEmitterInterval);
+            window.photonEmitterInterval = setInterval(() => {
+                if (photons.length < maxPhotons) {
+                    const numNewPhotons = Math.min(emissionRate, maxPhotons - photons.length);
+                    for (let i = 0; i < numNewPhotons; i++) {
+                        emitPhoton();
+                    }
+                }
+            }, 100);
+        }
+        
+        // 设置事件监听器 - 完全重新设计
+        function setupEventListeners() {
+            // 添加debugger语句来调试事件绑定
+            console.log("设置所有事件监听器");
+            
+            // 确保DOM加载完成
+            const wavelengthSlider = document.getElementById('wavelength');
+            if (!wavelengthSlider) {
+                console.error("无法找到DOM元素!");
+                return;  // 如果找不到元素，直接返回
+            }
+            
+            // 波长滑动条 - 使用change事件代替input
+            wavelengthSlider.addEventListener('input', function(e) {
+                wavelength = parseFloat(e.target.value);
+                updateExperiment();  // 直接调用更新函数
+            });
+            
+            // 缝隙宽度滑动条
+            document.getElementById('slitWidth').addEventListener('input', function(e) {
+                slitWidth = parseFloat(e.target.value);
+                updateExperiment();
+            });
+            
+            // 缝隙间距滑动条
+            document.getElementById('slitDistance').addEventListener('input', function(e) {
+                slitDistance = parseFloat(e.target.value);
+                updateExperiment();
+            });
+            
+            // 光强度滑动条
+            document.getElementById('intensity').addEventListener('input', function(e) {
+                intensity = parseFloat(e.target.value);
+                updateExperiment();
+            });
+            
+            // 添加其他滑动条监听器...
+        }
+        
+        // 在页面加载完成后初始化
+        window.onload = function() {
+            console.log("页面加载完成，开始初始化");
+            init();
+            updateUIValues();  // 确保初始UI值正确显示
+        };
+    </script>
+</body>
+</html>
